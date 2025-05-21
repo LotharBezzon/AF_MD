@@ -16,6 +16,9 @@ def read_data(protein, num_models=5):
             "Please, rename it correctly or download data from https://colab.research.google.com/github/sokrypton/ColabFold/blob/main/AlphaFold2.ipynb"
         )
 
+    seq_len, seq = np.loadtxt(f'{protein}/seq.txt', dtype=str)
+    seq_len = int(seq_len)
+    
     paes = []
     dgrams = []
 
@@ -56,7 +59,7 @@ def read_data(protein, num_models=5):
 
     coords = np.array(coords)
 
-    return coords, bins, pae, dgram
+    return coords, bins, pae, dgram, seq_len, seq
 
 
 

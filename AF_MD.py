@@ -1,12 +1,21 @@
-from read_data import read_data
+from read_data import *
+from utils import *
 import numpy as np
-import pickle
 from scipy.special import softmax
+from openmm import app, unit, openmm
+from openmm.vec3 import Vec3
 
 protein = 'chignolin'
+coords, bins, pae, dgram, seq_len, seq = read_data(protein)
 
-cpm, pae, plddts = read_data(protein)
+### Set up the OpenMM system
+system = openmm.System()
+system.setDefaultPeriodicBoxVectors(
+    Vec3(10, 0, 0), Vec3(0, 10, 0), Vec3(0, 0, 10)
+) # A sufficiently large box for non-periodic simulations
 
-with open('chignolin.pickle', 'rb') as f:
-    data = pickle.load(f)
-    print(softmax(data['distogram']['logits'][0][5]))
+### Create particles
+masses = get_bead_masses_from_sequence(seq)
+for i in range(seq_len):
+    system.addParticle(masses[i] * unit.amu)
+
