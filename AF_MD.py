@@ -19,3 +19,7 @@ masses = get_bead_masses_from_sequence(seq)
 for i in range(seq_len):
     system.addParticle(masses[i] * unit.amu)
 
+### Define potentials
+'''
+use CustomNonbondedForce to define the potentials (all beads are connected)
+use a 2d tabulated function (actual potential in rows and particle parameters to choose the rigth row)'''
