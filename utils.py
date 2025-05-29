@@ -1,3 +1,5 @@
+from openmm import app
+
 def get_bead_masses_from_sequence(amino_acid_sequence: str):
     """
     Calculates the mass for each bead in a coarse-grained protein model,
@@ -8,7 +10,7 @@ def get_bead_masses_from_sequence(amino_acid_sequence: str):
                                    (e.g., "ARNDCEQGHI"). Uses one-letter codes.
 
     Returns:
-        list: A list of masses (in Daltons or atomic mass units, amu) for each
+        list: A list of mm.app.element.Element for each
               amino acid in the sequence.
               Returns an empty list if the sequence is empty or contains
               unrecognized amino acid codes.
@@ -39,8 +41,9 @@ def get_bead_masses_from_sequence(amino_acid_sequence: str):
         'Y': 163.1760,  # Tyrosine
         'V': 99.1326    # Valine
     }
-
+    
     masses = []
+    
     # Convert the sequence to uppercase to handle both 'a' and 'A'
     for aa_code in amino_acid_sequence.upper():
         if aa_code in amino_acid_residue_masses:
