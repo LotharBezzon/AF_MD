@@ -1,4 +1,5 @@
 from openmm import app
+import openmm as mm
 
 def get_bead_masses_from_sequence(amino_acid_sequence: str):
     """
@@ -54,3 +55,25 @@ def get_bead_masses_from_sequence(amino_acid_sequence: str):
                 "Please use one-letter codes (e.g., 'ARNDCEQGHI')."
             )
     return masses
+
+def write_xyz_file_frame(filename, state, seq, seq_len, frame_num):
+    """
+    Writes the coordinates of the system to an XYZ file.
+
+    Args:
+        filename (str): The name of the output file.
+        state (mm.State): The state containing the coordinates.
+        seq (str): The amino acid sequence.
+        seq_len (int): The length of the sequence.
+    """
+    if frame_num == 0:
+        writing_type = 'w'
+    else:
+        writing_type = 'a'
+
+    with open(filename, writing_type) as f:
+        f.write(f"{seq_len}\n")
+        f.write(f"Frame: {frame_num}\n")
+        positions = state.getPositions() * 10 # Convert from nm to Angstroms
+        for i in range(seq_len):
+            f.write(f"{seq[i]} {positions[i].x:.3f} {positions[i].y:.3f} {positions[i].z:.3f}\n")

@@ -40,6 +40,9 @@ AF_force.setCutoffDistance(21.0 * unit.angstroms)   # because the last bin inclu
 AF_force.addPerParticleParameter('index')
 AF_force.addGlobalParameter('seq_len', seq_len)
 AF_force.addTabulatedFunction('U', potentials)
+AF_force.setNonbondedMethod(mm.CustomNonbondedForce.CutoffPeriodic)  # Use periodic boundary conditions
+print(f'cutoff distance: {AF_force.getCutoffDistance()}')
+print(f'force field is periodic: {AF_force.usesPeriodicBoundaryConditions()}')
 for i in range(seq_len):
     AF_force.addParticle([i])
 
@@ -48,8 +51,8 @@ system.addForce(AF_force)
 ### Set up the simulation
 # Set up the integrator
 temperature = 300.0 * unit.kelvin
-friction_coefficient = 1.0 / unit.picosecond
-step_size = 2.0 * unit.femtosecond
+friction_coefficient = 0.1 / unit.picosecond
+step_size = 0.01 * unit.picosecond
 
 integrator = mm.LangevinIntegrator(temperature, friction_coefficient, step_size)
 
@@ -61,4 +64,14 @@ context = mm.Context(system, integrator, platform)
 context.setPositions(coords * unit.angstrom)  # Set initial positions
 context.setVelocitiesToTemperature(temperature)  # Set initial velocities
 
-print(dgram[3,2])
+### Run the simulation
+tot_steps = 10000  # Number of steps to run the simulation
+num_steps = 0
+while num_steps < tot_steps:
+    state = context.getState(energy=True, positions=True)
+    write_xyz_file_frame(f'{protein}.xyz', state, seq, seq_len, num_steps)
+    num_steps += 100
+    integrator.step(100)  # Run 100 steps at a time
+    
+
+
