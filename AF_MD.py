@@ -32,7 +32,7 @@ use a 2d tabulated function (actual potential in rows and particle indexes to ch
 
 # Create potentials
 values = np.concatenate([-dgram[i, j] + np.log(np.sum(np.exp(dgram[i,j]))) for i in range(seq_len) for j in range(seq_len)])
-potentials = mm.Continuous2DFunction(64, seq_len**2, values, 2+10/64, 22-10/64, 0, seq_len**2)
+potentials = mm.Continuous2DFunction(64, seq_len**2, values, (2+10/64)/10, (22-10/64)/10, 0, seq_len**2)    # lenths are expressed in nanometers, so we need to scale them down to match the OpenMM units
 
 # Create force field
 AF_force = mm.CustomNonbondedForce('U(r, index); index = seq_len * index1 + index2')
@@ -51,7 +51,7 @@ system.addForce(AF_force)
 ### Set up the simulation
 # Set up the integrator
 temperature = 300.0 * unit.kelvin
-friction_coefficient = 0.1 / unit.picosecond
+friction_coefficient = 1.0 / unit.picosecond
 step_size = 0.01 * unit.picosecond
 
 integrator = mm.LangevinIntegrator(temperature, friction_coefficient, step_size)
@@ -63,6 +63,7 @@ platform = mm.Platform.getPlatformByName('Reference') # Use 'Reference' for CPU,
 context = mm.Context(system, integrator, platform)
 context.setPositions(coords * unit.angstrom)  # Set initial positions
 context.setVelocitiesToTemperature(temperature)  # Set initial velocities
+
 
 ### Run the simulation
 tot_steps = 10000  # Number of steps to run the simulation

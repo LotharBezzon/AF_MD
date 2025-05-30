@@ -1,5 +1,6 @@
 from openmm import app
 import openmm as mm
+import numpy as np
 
 def get_bead_masses_from_sequence(amino_acid_sequence: str):
     """
@@ -56,6 +57,7 @@ def get_bead_masses_from_sequence(amino_acid_sequence: str):
             )
     return masses
 
+
 def write_xyz_file_frame(filename, state, seq, seq_len, frame_num):
     """
     Writes the coordinates of the system to an XYZ file.
@@ -77,3 +79,31 @@ def write_xyz_file_frame(filename, state, seq, seq_len, frame_num):
         positions = state.getPositions() * 10 # Convert from nm to Angstroms
         for i in range(seq_len):
             f.write(f"{seq[i]} {positions[i].x:.3f} {positions[i].y:.3f} {positions[i].z:.3f}\n")
+
+
+def xyz_to_numpy(filename):
+    """
+    Reads an XYZ file and returns the coordinates as a NumPy array.
+
+    Args:
+        filename (str): The name of the XYZ file.
+
+    Returns:
+        np.ndarray: An array of shape (T, N, 3) containing the coordinates. T is the number of frames,
+        N is the number of atoms, and 3 corresponds to the x, y, z coordinates.
+    """
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+    
+    num_atoms = int(lines[0].strip())
+    num_frames = len(lines) // (num_atoms + 2)  # Each frame has num_atoms + 2 lines
+    
+    coords = np.empty((num_frames, num_atoms, 3), dtype=np.float32)
+    for frame in range(num_frames):
+        start_line = frame * (num_atoms + 2) + 2  # Skip the first two lines
+        for atom in range(num_atoms):
+            line = lines[start_line + atom].strip().split()
+            coords[frame, atom] = [float(line[1]), float(line[2]), float(line[3])]
+
+    return coords
+
