@@ -8,7 +8,7 @@ from openmm.vec3 import Vec3
 
 ### Load the data for the protein
 # This assumes you have a folder named 'chignolin' with the necessary files.
-protein = 'chignolin'
+protein = 'complexin_2'
 coords, bins, pae, dgram, seq_len, seq = read_data(protein)
 for i in range(seq_len):
     for j in range(seq_len):
@@ -32,11 +32,11 @@ use a 2d tabulated function (actual potential in rows and particle indexes to ch
 
 # Create potentials
 values = np.concatenate([-dgram[i, j] + np.log(np.sum(np.exp(dgram[i,j]))) for i in range(seq_len) for j in range(seq_len)])
-potentials = mm.Continuous2DFunction(64, seq_len**2, values, (2+10/64)/10, (22-10/64)/10, 0, seq_len**2)    # lenths are expressed in nanometers, so we need to scale them down to match the OpenMM units
+potentials = mm.Continuous2DFunction(64, seq_len**2, values, bins[0]/10, (bins[-1]+0.31)/10, 0, seq_len**2)    # lenths are expressed in nanometers, so we need to scale them down to match the OpenMM units
 
 # Create force field
 AF_force = mm.CustomNonbondedForce('U(r, index); index = seq_len * index1 + index2')
-AF_force.setCutoffDistance(21.0 * unit.angstroms)   # because the last bin include farther distances and I'm not treating it
+AF_force.setCutoffDistance(bins[-1] * unit.angstroms)   # because the last bin include farther distances and I'm not treating it
 AF_force.addPerParticleParameter('index')
 AF_force.addGlobalParameter('seq_len', seq_len)
 AF_force.addTabulatedFunction('U', potentials)
@@ -52,7 +52,7 @@ system.addForce(AF_force)
 # Set up the integrator
 temperature = 300.0 * unit.kelvin
 friction_coefficient = 1.0 / unit.picosecond
-step_size = 0.01 * unit.picosecond
+step_size = 0.05 * unit.picosecond
 
 integrator = mm.LangevinIntegrator(temperature, friction_coefficient, step_size)
 
@@ -66,13 +66,16 @@ context.setVelocitiesToTemperature(temperature)  # Set initial velocities
 
 
 ### Run the simulation
-tot_steps = 10000  # Number of steps to run the simulation
+tot_steps = 2e5  # Number of steps to run the simulation
 num_steps = 0
 while num_steps < tot_steps:
-    state = context.getState(energy=True, positions=True)
-    write_xyz_file_frame(f'{protein}.xyz', state, seq, seq_len, num_steps)
-    num_steps += 100
-    integrator.step(100)  # Run 100 steps at a time
+    state = context.getState(positions=True)
+    write_xyz_file_frame(f'{protein}_short.xyz', state, seq, seq_len, num_steps)
+    #print(state.getKineticEnergy() + state.getPotentialEnergy())
+    #temperature = np.sum(0.5 * np.array(masses)*1.6e-27 * np.sum(np.array(state.getVelocities())**2, axis=1)*1e6) / (1.5 * seq_len * 1.38e-23) # Calculate temperature from kinetic energy
+    #print(temperature)
+    num_steps += 10
+    integrator.step(10)  # Run 100 steps at a time
     
 
 

@@ -1,6 +1,8 @@
 from openmm import app
 import openmm as mm
 import numpy as np
+import pyemma
+import deeptime
 
 def get_bead_masses_from_sequence(amino_acid_sequence: str):
     """
@@ -106,4 +108,29 @@ def xyz_to_numpy(filename):
             coords[frame, atom] = [float(line[1]), float(line[2]), float(line[3])]
 
     return coords
+
+
+def get_inter_bead_distances(coords):
+    """
+    Calculates the inter-bead distances for a set of coordinates. First neighbours are ignored.
+
+    Args:
+        coords (np.ndarray): An array of shape (T, N, 3) containing the coordinates of the beads.
+
+    Returns:
+        np.ndarray: A square matrix of shape ((num_beads-1)*(num_beads-2)/2) containing the distances between the pairs of beads.
+    """
+    num_timesteps = coords.shape[0]
+    num_beads = coords.shape[1]
+    distances = np.empty((num_timesteps, int((num_beads-1)*(num_beads)/2)), dtype=np.float32)
+    
+    for t in range(num_timesteps):
+        count = 0
+        for i in range(num_beads):
+            for j in range(i + 1, num_beads):
+                dist = np.linalg.norm(coords[t, i] - coords[t, j])
+                distances[t, count] = dist
+                count += 1
+    
+    return distances
 

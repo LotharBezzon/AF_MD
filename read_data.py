@@ -64,5 +64,10 @@ def read_data(protein, num_models=5):
 
 
 if __name__ == "__main__":
-    protein = 'chignolin'
-    read_data(protein)
+    protein = 'complexin_2'  # Example protein name, change as needed
+    coords, bins, pae, dgram, seq_len, seq = read_data(protein)
+    for i in range(seq_len):
+        for j in range(seq_len):
+            dgram[i, j] = dgram[i, j] - np.max(dgram[i, j])
+    print(dgram[1,2])
+    print(bins)
