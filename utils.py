@@ -118,7 +118,7 @@ def get_inter_bead_distances(coords):
         coords (np.ndarray): An array of shape (T, N, 3) containing the coordinates of the beads.
 
     Returns:
-        np.ndarray: A square matrix of shape ((num_beads-1)*(num_beads-2)/2) containing the distances between the pairs of beads.
+        np.ndarray: A square matrix of shape ((num_beads-1)*(num_beads)/2) containing the distances between the pairs of beads.
     """
     num_timesteps = coords.shape[0]
     num_beads = coords.shape[1]
@@ -134,3 +134,27 @@ def get_inter_bead_distances(coords):
     
     return distances
 
+
+def get_per_residue_helicity(traj):
+    """
+    Calculates the per-residue helicity for a trajectory.
+
+    Args:
+        traj (np.ndarray): An array of shape (T, N, 3) containing the coordinates of the beads.
+
+    Returns:
+        np.ndarray: An array of shape (N-3,) containing the helicity for each residue trough the trajectory.
+    """
+    num_timesteps = traj.shape[0]
+    num_beads = traj.shape[1]
+    
+    # Initialize helicity array
+    helicity = np.zeros((num_beads), dtype=np.float32)
+    
+    shifted_traj = np.roll(traj, shift=-3, axis=1)
+    helical_distances = np.linalg.norm(traj - shifted_traj, axis=2)[:, :-3]
+    helix_mask = np.exp(-(helical_distances - 0.575)**2 / 0.08)
+    helicity = np.sum(helix_mask, axis=0) / num_timesteps  # Average over time
+    
+    
+    return helicity, helix_mask
