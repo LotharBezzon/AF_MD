@@ -17,7 +17,7 @@ for i in range(seq_len):
 ### Set up the OpenMM system
 system = mm.System()
 system.setDefaultPeriodicBoxVectors(
-    Vec3(10, 0, 0), Vec3(0, 10, 0), Vec3(0, 0, 10)
+    Vec3(30, 0, 0), Vec3(0, 30, 0), Vec3(0, 0, 30)
 ) # A sufficiently large box for non-periodic simulations. Length are expressed in nanometers.
 
 ### Create particles
