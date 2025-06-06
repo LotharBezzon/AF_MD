@@ -64,10 +64,14 @@ def read_data(protein, num_models=5):
 
 
 if __name__ == "__main__":
-    protein = 'alpha_synuclein'  # Example protein name, change as needed
+    protein = 'chignolin'  # Example protein name, change as needed
     coords, bins, pae, dgram, seq_len, seq = read_data(protein)
     for i in range(seq_len):
         for j in range(seq_len):
             dgram[i, j] = dgram[i, j] - np.max(dgram[i, j])
-    print(dgram[0,5])
-    print(bins)
+
+    values = np.concatenate([np.concatenate([np.array([40,30]), (-dgram[i, j] + np.log(np.sum(np.exp(dgram[i,j]))))*2.49]) for i in range(seq_len) for j in range(seq_len)])
+
+    print(values[66*21:66*22])
+    #print(dgram[1,2])
+    #print(bins)
