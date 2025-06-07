@@ -6,7 +6,8 @@ def check_folder_exists(protein):
     """
     Check if the file exists in the current directory.
     """
-    return os.path.isfile(f'{protein}/pkl0.pickle')
+    #return os.path.isfile(f'{protein}/pkl0.pickle')
+    return os.path.isfile(os.path.join(protein, 'pkl0.pickle')) and os.path.isfile(os.path.join(protein, 'seq.txt')) and os.path.isfile(os.path.join(protein, 'starting_structure.pdb'))
 
 def read_data(protein, num_models=5):
 
@@ -16,7 +17,7 @@ def read_data(protein, num_models=5):
             "Please, rename it correctly or download data from https://colab.research.google.com/github/sokrypton/ColabFold/blob/main/AlphaFold2.ipynb"
         )
 
-    seq_len, seq = np.loadtxt(f'{protein}/seq.txt', dtype=str)
+    seq_len, seq = np.loadtxt(os.path.join(protein, 'seq.txt'), dtype=str)
     seq_len = int(seq_len)
     
     paes = []
@@ -24,7 +25,7 @@ def read_data(protein, num_models=5):
 
     for i in range(num_models):
 
-        with open(f'{protein}/pkl{i}.pickle', 'rb') as f:
+        with open(os.path.join(protein, f'pkl{i}.pickle'), 'rb') as f:
 
             data = pickle.load(f)
 
@@ -42,7 +43,7 @@ def read_data(protein, num_models=5):
     dgram = np.mean(dgrams, axis=0)
 
     # Get starting positions
-    with open(f'{protein}/starting_structure.pdb', 'r') as f:
+    with open(os.path.join(protein, 'starting_structure.pdb'), 'r') as f:
 
         lines = f.readlines()
         coords = []

@@ -5,10 +5,17 @@ from scipy.special import softmax
 from openmm import app, unit
 import openmm as mm
 from openmm.vec3 import Vec3
+import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-p', '--protein', help='Protein name', type=str, required=False)
+args = parser.parse_args()
 ### Load the data for the protein
 # This assumes you have a folder named 'chignolin' with the necessary files.
-protein = 'alpha_synuclein'
+if args.protein:
+    protein = args.protein
+else: protein = 'alpha_synuclein'
+
 coords, bins, pae, dgram, seq_len, seq = read_data(protein)
 for i in range(seq_len):
     for j in range(seq_len):

@@ -158,3 +158,27 @@ def get_per_residue_helicity(traj):
     
     
     return helicity, helix_mask
+
+def get_frame_from_xyz(filename, frame_num):
+    """
+    Reads a specific frame from an XYZ file and write a new file with the specific frame.
+
+    Args:
+        filename (str): The name of the XYZ file.
+        frame_num (int): The frame number to read (0-indexed).
+
+    """
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+    
+    num_atoms = int(lines[0].strip())
+    start_line = frame_num * (num_atoms + 2)
+
+    with open(f'{filename[:-4]}_frame{frame_num}.xyz', 'w') as f:
+        for atom in range(num_atoms + 2):  # +2 to include the first two lines (number of atoms and comment)
+            f.write(lines[start_line + atom])
+
+        
+        # Read the coordinates for the specified frame
+    
+
