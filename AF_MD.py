@@ -14,7 +14,7 @@ args = parser.parse_args()
 # This assumes you have a folder named 'chignolin' with the necessary files.
 if args.protein:
     protein = args.protein
-else: protein = 'alpha_synuclein'
+else: protein = 'complexin_2'
 
 coords, bins, pae, dgram, seq_len, seq = read_data(protein)
 for i in range(seq_len):
@@ -75,11 +75,11 @@ context.setVelocitiesToTemperature(temperature)  # Set initial velocities
 
 
 ### Run the simulation
-tot_steps = 2e6  # Number of steps to run the simulation
+tot_steps = 2e5  # Number of steps to run the simulation
 num_steps = 0
 while num_steps < tot_steps:
     state = context.getState(positions=True)
-    write_xyz_file_frame(f'{protein}.xyz', state, seq, seq_len, num_steps)
+    write_xyz_file_frame(f'{protein}_short.xyz', state, seq, seq_len, num_steps)
     #print(state.getKineticEnergy() + state.getPotentialEnergy())
     #temperature = np.sum(0.5 * np.array(masses)*1.6e-27 * np.sum(np.array(state.getVelocities())**2, axis=1)*1e6) / (1.5 * seq_len * 1.38e-23) # Calculate temperature from kinetic energy
     #print(temperature)
