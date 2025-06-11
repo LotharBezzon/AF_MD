@@ -1,8 +1,7 @@
 from read_data import *
 from utils import *
 import numpy as np
-from scipy.special import softmax
-from openmm import app, unit
+from openmm import unit
 import openmm as mm
 from openmm.vec3 import Vec3
 import argparse
@@ -14,9 +13,12 @@ args = parser.parse_args()
 # This assumes you have a folder named 'chignolin' with the necessary files.
 if args.protein:
     protein = args.protein
-else: protein = 'complexin_2'
+else: protein = 'alpha_synuclein'
+print(f'Simulating {protein}...')
 
 coords, bins, pae, dgram, seq_len, seq = read_data(protein)
+
+# Normalize distograms
 for i in range(seq_len):
     for j in range(seq_len):
         dgram[i, j] = dgram[i, j] - np.max(dgram[i, j])  # Needed for numerical stability. Note that evaluated probabilities don't change
@@ -38,7 +40,7 @@ use CustomNonbondedForce to define the potentials (all beads are connected!)
 use a 2d tabulated function (actual potential in rows and particle indexes to choose the rigth row)'''
 
 # Create potentials
-values = np.concatenate([np.concatenate([np.array([60,50]), (-dgram[i, j] + np.log(np.sum(np.exp(dgram[i,j]))))*2.49]) for i in range(seq_len) for j in range(seq_len)])
+values = np.concatenate([np.concatenate([np.array([60,50]), (-dgram[i, j] + np.log(np.sum(np.exp(dgram[i,j]))))*2.49]) for i in range(seq_len) for j in range(seq_len)])    # energy is in kJ/mol
 potentials = mm.Continuous2DFunction(66, seq_len**2, values, bins[0]/10-0.062, (bins[-1]+0.31)/10, 0, seq_len**2)    # lenths are expressed in nanometers, so we need to scale them down to match the OpenMM units
 
 # Create force field
@@ -80,7 +82,6 @@ num_steps = 0
 while num_steps < tot_steps:
     state = context.getState(positions=True)
     write_xyz_file_frame(f'{protein}_short.xyz', state, seq, seq_len, num_steps)
-    #print(state.getKineticEnergy() + state.getPotentialEnergy())
     #temperature = np.sum(0.5 * np.array(masses)*1.6e-27 * np.sum(np.array(state.getVelocities())**2, axis=1)*1e6) / (1.5 * seq_len * 1.38e-23) # Calculate temperature from kinetic energy
     #print(temperature)
     num_steps += 10

@@ -115,7 +115,7 @@ def get_inter_bead_distances(coords):
     Calculates the inter-bead distances for a set of coordinates. First neighbours are ignored.
 
     Args:
-        coords (np.ndarray): An array of shape (T, N, 3) containing the coordinates of the beads.
+        coords (np.ndarray): An array of shape (T, N, 3) containing the coordinates of the beads along the trajectory.
 
     Returns:
         np.ndarray: A square matrix of shape ((num_beads-1)*(num_beads)/2) containing the distances between the pairs of beads.
